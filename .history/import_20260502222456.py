@@ -3,7 +3,7 @@ import json
 
 def look_for_id(ings_wynnbuilder,name):
     for ing in ings_wynnbuilder:
-        if ing["name"] == name:
+        if ing["displayName"] == name:
             return ing["id"]
     raise ValueError(f"problem with {name}. COuldn't be found in wynnbuilder ingredients")    
 
@@ -44,7 +44,7 @@ try:
     with open("ingredients.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-    print("Données enregistrées dans ingredients.json")
+    print("Données enregistrées dans resultat.json")
 
 except requests.exceptions.RequestException as e:
     print(f"Erreur lors de la requête : {e}")

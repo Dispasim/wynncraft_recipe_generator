@@ -13,19 +13,19 @@ POP_SIZE = 200
 GENERATIONS = 200
 MUTATION_RATE = 0.1
 LEVEL_MIN = 0
-LEVEL_MAX = 107
-FOCUSED_STAT = "gatherXpBonus"
-INGREDIENT_BLACKLIST = []
+LEVEL_MAX = 83
+FOCUSED_STAT = "combatExperience"
+INGREDIENT_BLACKLIST = ["Pink Pelute","Roots of Eternity"]#["Aspect of the Void"]
 ITEM = "scroll"
 RAW_RECIPE_PATH = "Recipes.xlsx"
 NUMBER_OF_INDIVIDUALS_SELECTED_PER_GENERATION = 80
-DURATION_MIN = 600
+DURATION_MIN = 1000
 MIN_MAX_OR_MEAN = "mean"
 #Le premier ingrédient est celui à gauche sur wynnbuilder
-FIRST_INGREDIENT_QUALITY = 2 #1, 2 ou 3 étoiles
-SECOND_INGREDIENT_QUALITY = 2 #1, 2 ou 3 étoiles
-SELECTION_METHOD = "tournament" #sus, tournament, roulette, rank ou boltz
-USE_ELITE = True
+FIRST_INGREDIENT_QUALITY = 1 #1, 2 ou 3 étoiles
+SECOND_INGREDIENT_QUALITY = 1 #1, 2 ou 3 étoiles
+SELECTION_METHOD = "sus" #sus, tournament, roulette, rank ou boltz
+USE_ELITE = False
 TOURNAMENT_SELECTION_ROUND = 3
 BOLTZMANN_SELECTION_TEMPERATURE = 1.0
 

@@ -69,8 +69,8 @@ class Individual:
         #cette étape est combinable avec la première 
         for i in range(3):
             for j in range(2):
-                #stat_array[i][j] = np.floor(stat_array[i][j] * ((temp_boost_array[i][j]/100) + 1))  
-                stat_array[i][j] = stat_array[i][j] * ((temp_boost_array[i][j]/100) + 1)
+                stat_array[i][j] = np.floor(stat_array[i][j] * ((temp_boost_array[i][j]/100) + 1))  
+                #stat_array[i][j] = stat_array[i][j] * ((temp_boost_array[i][j]/100) + 1)
       
         if self.duration <= 0:
             rep = 0             

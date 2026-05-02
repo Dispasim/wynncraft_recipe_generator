@@ -9,22 +9,22 @@ import math
 # ======================
 # PARAMÈTRES
 # ======================
-POP_SIZE = 200
+POP_SIZE = 2000
 GENERATIONS = 200
 MUTATION_RATE = 0.1
 LEVEL_MIN = 0
-LEVEL_MAX = 107
+LEVEL_MAX = 105
 FOCUSED_STAT = "gatherXpBonus"
-INGREDIENT_BLACKLIST = []
+INGREDIENT_BLACKLIST = ["Roots of Eternity"]
 ITEM = "scroll"
 RAW_RECIPE_PATH = "Recipes.xlsx"
 NUMBER_OF_INDIVIDUALS_SELECTED_PER_GENERATION = 80
 DURATION_MIN = 600
 MIN_MAX_OR_MEAN = "mean"
 #Le premier ingrédient est celui à gauche sur wynnbuilder
-FIRST_INGREDIENT_QUALITY = 2 #1, 2 ou 3 étoiles
-SECOND_INGREDIENT_QUALITY = 2 #1, 2 ou 3 étoiles
-SELECTION_METHOD = "tournament" #sus, tournament, roulette, rank ou boltz
+FIRST_INGREDIENT_QUALITY = 1 #1, 2 ou 3 étoiles
+SECOND_INGREDIENT_QUALITY = 1 #1, 2 ou 3 étoiles
+SELECTION_METHOD = "boltz" #sus, tournament, roulette, rank ou boltz
 USE_ELITE = True
 TOURNAMENT_SELECTION_ROUND = 3
 BOLTZMANN_SELECTION_TEMPERATURE = 1.0
