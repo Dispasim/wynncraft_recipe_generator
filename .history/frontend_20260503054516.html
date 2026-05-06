@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Genetic Algorithm Runner</title>
+</head>
+<body>
+
+<h1>Algorithme Génétique</h1>
+
+<button onclick="runAlgo()">Lancer</button>
+
+<pre id="output"></pre>
+
+<script>
+async function runAlgo() {
+    document.getElementById("output").innerText = "Calcul en cours...";
+
+    const response = await fetch("/run");
+    const data = await response.json();
+
+    document.getElementById("output").innerText =
+        "Score: " + data.score + "\n\n" +
+        "Recipe: " + data.recipe + "\n\n" +
+        "Boost: " + JSON.stringify(data.boost) + "\n\n" +
+        "Stats: " + JSON.stringify(data.stats) + "\n\n" +
+        "Lien: " + data.link;
+}
+</script>
+
+</body>
+</html>

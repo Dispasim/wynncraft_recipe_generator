@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Recipe Generator</h2>
+
+<label>Item:</label>
+<select id="item">
+    <option>helmet</option>
+    <option>chestplate</option>
+    <option>boots</option>
+</select>
+
+<label>Stat:</label>
+<input id="stat" value="Melee Damage %">
+
+<label>Level:</label>
+<input id="level" type="number" value="117">
+
+<label>Population size:</label>
+<input id="pop" type="number" value="500">
+
+<label>Generations:</label>
+<input id="gen" type="number" value="100">
+
+<button onclick="runAlgo()">Run</button>
+
+<pre id="output"></pre>
+
+<script>
+async function runAlgo() {
+    const body = {
+        item: document.getElementById("item").value,
+        stat: document.getElementById("stat").value,
+        level: parseInt(document.getElementById("level").value),
+        pop_size: parseInt(document.getElementById("pop").value),
+        generations: parseInt(document.getElementById("gen").value),
+        duration_min: 20
+    };
+
+    document.getElementById("output").innerText = "Running...";
+
+    const res = await fetch("http://127.0.0.1:8000/run", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+
+    document.getElementById("output").innerText =
+        JSON.stringify(data, null, 2);
+}
+</script>
+
+</body>
+</html>

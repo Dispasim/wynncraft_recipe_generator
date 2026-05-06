@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Recipe Generator</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    .container {
+        background: #1e293b;
+        padding: 30px;
+        border-radius: 12px;
+        width: 420px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #38bdf8;
+    }
+
+    label {
+        display: block;
+        margin-top: 12px;
+        margin-bottom: 5px;
+        font-size: 14px;
+        color: #cbd5e1;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: none;
+        outline: none;
+        background: #0f172a;
+        color: white;
+        font-size: 14px;
+    }
+
+    input:focus, select:focus {
+        outline: 2px solid #38bdf8;
+    }
+
+    button {
+        margin-top: 20px;
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        background: #38bdf8;
+        color: #0f172a;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        background: #0ea5e9;
+    }
+
+    pre {
+        margin-top: 20px;
+        background: #0f172a;
+        padding: 12px;
+        border-radius: 8px;
+        max-height: 250px;
+        overflow: auto;
+        font-size: 12px;
+        color: #22c55e;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Recipe Generator</h2>
+
+<label>Item:</label>
+<select id="item">
+    <option>helmet</option>
+    <option>chestplate</option>
+    <option>leggings</option>
+    <option>boots</option>
+    <option>wand</option>
+    <option>bow</option>
+    <option>relik</option>
+    <option>spear</option>
+    <option>dagger</option>
+    <option>potion</option>
+    <option>scroll</option>
+    <option>food</option>
+</select>
+
+<label>Stat:</label>
+<input id="stat" list="stats" placeholder="Choisis une stat">
+
+<datalist id="stats"></datalist>
+
+<label>Level:</label>
+<input id="level" type="number" value="117">
+
+<label>Population size:</label>
+<input id="pop" type="number" value="500">
+
+<label>Generations:</label>
+<input id="gen" type="number" value="100">
+
+<button onclick="runAlgo()">Run</button>
+
+<pre id="output"></pre>
+
+</div>
+
+<script>
+const statsJson = {
+    "Durability": "durability",
+    "Duration": "duration",
+    "Charges": "charges",
+    "Effectiveness Left": "left",
+    "Effectiveness Right": "right",
+    "Effectiveness Above": "above",
+    "Effectiveness Under": "under",
+    "Effectiveness Touching": "touching",
+    "Effectiveness Not Touching": "nottouching",
+    "Combat Level": "lvl",
+    "Req Strength": "strReq",
+    "Req Dexterity": "dexReq",
+    "Req Intelligence": "intReq",
+    "Req Agility": "agiReq",
+    "Req Defense": "defReq",
+    "% Health Regen": "hprPct",
+    "Mana Regen": "mr",
+    "Life Steal": "ls",
+    "Mana Steal": "ms",
+    "XP Bonus": "xpb",
+    "Loot Bonus": "lb",
+    "Reflection": "ref",
+    "Strength": "str",
+    "Dexterity": "dex",
+    "Intelligence": "int",
+    "Agility": "agi",
+    "Defense": "def",
+    "Thorns": "thorns",
+    "Exploding": "expd",
+    "Walk Speed": "spd",
+    "Attack Speed Bonus": "atkTier",
+    "Poison": "poison",
+    "Health Bonus": "hpBonus",
+    "Soul Point Regen": "spRegen",
+    "Stealing": "eSteal",
+    "Raw Health Regen": "hprRaw",
+    "Spell Damage Raw": "sdRaw",
+    "Elem. Spell Damage Raw": "rSdRaw",
+    "Neut. Spell Damage Raw": "nSdRaw",
+    "Earth Spell Damage Raw": "eSdRaw",
+    "Thunder Spell Damage Raw": "tSdRaw",
+    "Water Spell Damage Raw": "wSdRaw",
+    "Fire Spell Damage Raw": "fSdRaw",
+    "Air Spell Damage Raw": "aSdRaw",
+    "Spell Damage %": "sdPct",
+    "Elem. Spell Damage %": "rSdPct",
+    "Neut. Spell Damage %": "nSdPct",
+    "Earth Spell Damage %": "eSdPct",
+    "Thunder Spell Damage %": "tSdPct",
+    "Water Spell Damage %": "wSdPct",
+    "Fire Spell Damage %": "fSdPct",
+    "Air Spell Damage %": "aSdPct",
+    "Melee Damage Raw": "mdRaw",
+    "Elem. Melee Damage Raw": "rMdRaw",
+    "Neut. Melee Damage Raw": "nMdRaw",
+    "Earth Melee Damage Raw": "eMdRaw",
+    "Thunder Melee Damage Raw": "tMdRaw",
+    "Water Melee Damage Raw": "wMdRaw",
+    "Fire Melee Damage Raw": "fMdRaw",
+    "Air Melee Damage Raw": "aMdRaw",
+    "Melee Damage %": "mdPct",
+    "Elem. Melee Damage %": "rMdPct",
+    "Neut. Melee Damage %": "nMdPct",
+    "Earth Melee Damage %": "eMdPct",
+    "Thunder Melee Damage %": "tMdPct",
+    "Water Melee Damage %": "wMdPct",
+    "Fire Melee Damage %": "fMdPct",
+    "Air Melee Damage %": "aMdPct",
+    "Damage Raw": "damRaw",
+    "Elemental Damage Raw": "rDamRaw",
+    "Neutral Damage Raw": "nDamRaw",
+    "Earth Damage Raw": "eDamRaw",
+    "Thunder Damage Raw": "tDamRaw",
+    "Water Damage Raw": "wDamRaw",
+    "Fire Damage Raw": "fDamRaw",
+    "Air Damage Raw": "aDamRaw",
+    "Damage %": "damPct",
+    "Elemental Damage %": "rDamPct",
+    "Neutral Damage %": "nDamPct",
+    "Earth Damage %": "eDamPct",
+    "Thunder Damage %": "tDamPct",
+    "Water Damage %": "wDamPct",
+    "Fire Damage %": "fDamPct",
+    "Air Damage %": "aDamPct",
+    "Critical Damage Bonus %": "critDamPct",
+
+    "% Fire Defense": "fDefPct",
+    "% Water Defense": "wDefPct",
+    "% Air Defense": "aDefPct",
+    "% Thunder Defense": "tDefPct",
+    "% Earth Defense": "eDefPct",
+    "% Elemental Defense": "rDefPct",
+
+    "1st Spell Cost %": "-spPct1",
+    "1st Spell Cost Raw": "-spRaw1",
+    "2nd Spell Cost %": "-spPct2",
+    "2nd Spell Cost Raw": "-spRaw2",
+    "3rd Spell Cost %": "-spPct3",
+    "3rd Spell Cost Raw": "-spRaw3",
+    "4th Spell Cost %": "-spPct4",
+    "4th Spell Cost Raw": "-spRaw4",
+    "Rainbow Spell Damage Raw": "rSdRaw",
+    "Sprint": "sprint",
+    "Sprint Regen": "sprintReg",
+    "Jump Height": "jh",
+    "Loot Quality": "lq",
+    "Gather XP Bonus": "gXp",
+    "Gather Speed Bonus": "gSpd",
+    "Healing Efficiency": "healPct",
+    "Knockback": "kb",
+    "Weaken Enemy": "weakenEnemy",
+    "Slow Enemy": "slowEnemy",
+    "Max Mana": "maxMana",
+    "Main Attack Range": "mainAttackRange"
+};
+
+function loadStats() {
+    const datalist = document.getElementById("stats");
+
+    Object.keys(statsJson).forEach(label => {
+        const option = document.createElement("option");
+        option.value = label;
+        datalist.appendChild(option);
+    });
+}
+
+loadStats();
+
+async function runAlgo() {
+    const body = {
+        item: document.getElementById("item").value,
+        stat: document.getElementById("stat").value,
+        level: parseInt(document.getElementById("level").value),
+        pop_size: parseInt(document.getElementById("pop").value),
+        generations: parseInt(document.getElementById("gen").value),
+        duration_min: 20
+    };
+
+    document.getElementById("output").innerText = "Running...";
+
+    const res = await fetch("http://127.0.0.1:8000/run", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+
+    document.getElementById("output").innerText =
+        JSON.stringify(data, null, 2);
+}
+</script>
+
+</body>
+</html>
