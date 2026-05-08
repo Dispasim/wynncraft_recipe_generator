@@ -242,9 +242,8 @@ def main_page():
             
 
             #best = max([best] + population, key=lambda ind: ind.fitness(stat=translated_stat, duration_min=duration_min, min_max_or_mean=min_max_or_mean, req_stats = st.session_state.req_stats))
-            status_text.text(f"Génération {gen_idx + 1}/{generations}\n")
-            for stat in translated_stats:
-                status_text.text(f"Best fitness {stat} = {best.fitness(stat)}")
+
+            status_text.text(f"Génération {gen_idx + 1}/{generations}\nBest fitness = {best.multi_fitness(translated_stats)}")
             #status_text.text(f"Génération {gen_idx + 1}/{generations}\nBest fitness = {best_archive[0][1]}")
             #status_text.text(f"Génération {gen_idx + 1}/{generations}")
             

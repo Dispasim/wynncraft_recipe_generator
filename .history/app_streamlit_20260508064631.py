@@ -125,8 +125,6 @@ with st.sidebar:
 
     stats = ["Strength", "Dexterity", "Intelligence", "Defense", "Agility"]
 
-    charges = st.number_input("Charges", min_value=1, value=3)
-
     req_values = {}
 
     st.subheader("Prérequis")
@@ -214,20 +212,19 @@ def main_page():
                                     min_max_or_mean=min_max_or_mean,
                                     req_stats=req_stats,
                                     weights=weights,
-                                    charges=charges,
                                     pop_size=pop_size)
         #best_archive = {}
         best_total = (None,0)
         for gen_idx in range(generations):
             # 🔹 Ton algo génétique
             if elitism:
-                selected = select_with_elite(population=population,translated_stat=translated_stats,method=method,n_select=n_select,elite_ratio=elite_ratio)
+                selected = select_with_elite(population=population,translated_stat=translated_stats,duration_min=duration_min,min_max_or_mean = min_max_or_mean, req_stats=st.session_state.req_stats,method=method,n_select=n_select,elite_ratio=elite_ratio)
             else:    
-                selected = select(population=population,translated_stat=translated_stats,method=method,n_select=n_select)
+                selected = select(population=population,translated_stat=translated_stats,duration_min=duration_min,min_max_or_mean = min_max_or_mean, req_stats=st.session_state.req_stats,method=method,n_select=n_select)
             new_pop = []
             for _ in range(pop_size):
                 parent1,parent2 = random.sample(selected, 2)
-                offspring = crossover(parent1,parent2,data,item,level,raw_recipes,ingredient_quality_coefficient,min_max_or_mean,req_stats,weights,charges)
+                offspring = crossover(parent1,parent2,data,item,level,raw_recipes,ingredient_quality_coefficient)
                 offspring_ = mutation(offspring,data,mutation_rate)
                 new_pop.append(offspring_)
             population = copy.deepcopy(new_pop)
@@ -235,16 +232,15 @@ def main_page():
             progress = int((gen_idx + 1) / generations * 100)
             progress_bar.progress(progress)
 
-            best = max(population, key=lambda ind: ind.multi_fitness(translated_stats))
-            if best.multi_fitness(translated_stats)>best_total[1]:
-                best_total = (copy.deepcopy(best),best.multi_fitness(translated_stats))
+            best = max(population, key=lambda ind: ind.fitness(translated_stat,duration_min = duration_min, min_max_or_mean = min_max_or_mean, req_stats = st.session_state.req_stats))
+            if best.fitness(translated_stat,duration_min = duration_min, min_max_or_mean = min_max_or_mean, req_stats = st.session_state.req_stats)>best_total[1]:
+                best_total = (copy.deepcopy(best),best.fitness(translated_stat,duration_min = duration_min, min_max_or_mean = min_max_or_mean, req_stats = st.session_state.req_stats))
             #best_archive = update_best_archive_fast(best_archive,population,x=st.session_state.x,fitness_fn=lambda ind: ind.fitness(stat=translated_stat,duration_min=duration_min,min_max_or_mean=min_max_or_mean,req_stats=req_stats),hash_fn=lambda ind: ind.encode_wynn_craft_hash([quality_one, quality_two]))
             
 
             #best = max([best] + population, key=lambda ind: ind.fitness(stat=translated_stat, duration_min=duration_min, min_max_or_mean=min_max_or_mean, req_stats = st.session_state.req_stats))
-            status_text.text(f"Génération {gen_idx + 1}/{generations}\n")
-            for stat in translated_stats:
-                status_text.text(f"Best fitness {stat} = {best.fitness(stat)}")
+
+            status_text.text(f"Génération {gen_idx + 1}/{generations}\nBest fitness = {best.fitness(stat=translated_stat, duration_min=duration_min, min_max_or_mean=min_max_or_mean, req_stats = st.session_state.req_stats)}")
             #status_text.text(f"Génération {gen_idx + 1}/{generations}\nBest fitness = {best_archive[0][1]}")
             #status_text.text(f"Génération {gen_idx + 1}/{generations}")
             

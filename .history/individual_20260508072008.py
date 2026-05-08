@@ -232,9 +232,6 @@ class Individual:
         total_score *= duration_penalty 
 
         if self.item in ["potion", "food", "scroll"]:  
-            charges = self.count_charges()
-            if charges < self.charges_min:
-                total_score *= charges/self.charges_min   
 
 
         return total_score

@@ -23,10 +23,10 @@ CRAFTER_ENC = {
 }
 
 WB_B64_DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+-"
-SCALE = 15
+SCALE = 600
 
 class Individual:
-    def __init__(self,data,recipes_df,duration_min = 100,item="scroll",chosen_ingredients = None,lvl_max = 120,ingredient_quality_coefficient = 1,min_max_or_mean = "mean",req_stats = [200,200,200,200,200],weights = None,charges_min = 3):
+    def __init__(self,data,recipes_df,item="scroll",chosen_ingredients = None,lvl_max = 120,ingredient_quality_coefficient = 1):
         if chosen_ingredients == None:
             chosen_ingredients = random.choices(data, k=6)
 
@@ -39,13 +39,8 @@ class Individual:
         self.lvl_max = lvl_max
         self.raw_recipe_df = recipes_df
         self.duration = self.calculate_duration()
-        self.weights = weights
-        self.req_stats = req_stats
-        self.min_max_or_mean = min_max_or_mean
-        self.duration_min = duration_min
-        self.charges_min = charges_min
 
-    def fitness(self,stat):   
+    def fitness(self,stat,duration_min = 100,min_max_or_mean = "mean",req_stats = [200,200,200,200,200]):   
         #dans un premier temps, fitness ne vise qu'un seule stat
         #je pars du principe qu'il n'y a pas d'ingredient qui ont a la fois "left","rigth","above" ou "under" and touching 
         stat_array = np.zeros((3, 2))
@@ -54,11 +49,11 @@ class Individual:
             for j in range(2):
                 #if "ids" in self.recipe[i][j]:
                 if stat in self.recipe[i][j]["ids"]:
-                    if self.min_max_or_mean == "mean":
+                    if min_max_or_mean == "mean":
                         stat_array[i][j] = (self.recipe[i][j]["ids"][stat]["minimum"] + self.recipe[i][j]["ids"][stat]["maximum"])/2
-                    elif self.min_max_or_mean == "min":  
+                    elif min_max_or_mean == "min":  
                         stat_array[i][j] = self.recipe[i][j]["ids"][stat]["minimum"] 
-                    elif self.min_max_or_mean == "max":       
+                    elif min_max_or_mean == "max":       
                         stat_array[i][j] = self.recipe[i][j]["ids"][stat]["maximum"]  
                     else:
                         raise ValueError("MIN MAX OR MEAN incorrect")       
@@ -125,8 +120,8 @@ class Individual:
             rep = sum(stat_array.flat) * (2/(1 + np.exp(-(self.duration - duration_min)/SCALE)))   """
         if self.duration <= 0:
             rep = 0             
-        elif 0 < self.duration < self.duration_min:
-            rep = sum(stat_array.flat) * (self.duration/self.duration_min)
+        elif 0 < self.duration < duration_min:
+            rep = sum(stat_array.flat) * (self.duration/duration_min)
         
         else:
             rep = sum(stat_array.flat)
@@ -143,7 +138,7 @@ class Individual:
                     "necklace",
                     "bracelet"]:
             for i in range(len(req_list)):
-                if req_list[i] > self.req_stats[i]:
+                if req_list[i] > req_stats[i]:
                     rep = 0    
           
         return rep    
@@ -185,17 +180,17 @@ class Individual:
 
         print(boost_array[2:5,1:3])
 
-    def multi_fitness(self, stats):
+    def multi_fitness(self, stats, weights=None, duration_min=100, req_stats=[200,200,200,200,200]):
     
-        if self.weights is None:
-            self.weights = {stat: 1 for stat in stats}
+        if weights is None:
+            weights = {stat: 1 for stat in stats}
         
         total_score = 0
         stat_scores = {}
 
         # --- Calcul de chaque stat ---
         for stat in stats:
-            stat_value = self.fitness(stat)
+            stat_value = self.fitness(stat, duration_min=duration_min)
             
             # Normalisation douce (log pour éviter explosion)
             stat_value = np.log1p(max(stat_value, 0))
@@ -204,7 +199,7 @@ class Individual:
 
         # --- Combinaison pondérée ---
         for stat in stats:
-            total_score += self.weights[stat] * stat_scores[stat]
+            total_score += weights[stat] * stat_scores[stat]
 
         # --- Bonus d'équilibre (TRÈS IMPORTANT) ---
         # pénalise les builds déséquilibrés
@@ -215,27 +210,9 @@ class Individual:
 
         # --- Pénalité requirements (déjà dans ton code mais renforcée ici) ---
         if hasattr(self, "req_list"):
-            for i in range(len(self.req_stats)):
-                if self.req_list[i] > self.req_stats[i]:
+            for i in range(len(req_stats)):
+                if self.req_list[i] > req_stats[i]:
                     return 0
-                
-        
-
-
-            # ratio entre durée actuelle et durée voulue
-            #duration_ratio = self.duration / self.duration_min
-            # clamp entre 0 et 1
-            #duration_ratio = max(0, min(duration_ratio, 1))
-            # pénalité progressive exponentielle
-            #rep *= duration_ratio ** 2       
-        duration_penalty = 1 / (1 + np.exp(-(self.duration - self.duration_min) / SCALE))
-        total_score *= duration_penalty 
-
-        if self.item in ["potion", "food", "scroll"]:  
-            charges = self.count_charges()
-            if charges < self.charges_min:
-                total_score *= charges/self.charges_min   
-
 
         return total_score
 
@@ -382,12 +359,5 @@ class Individual:
 
         self.recalculate_duration()
         return self
-    
-    def count_charges(self):
-        rep = 3
-        for ing in self.recipe.flat:
-            rep += ing["consumableIDs"]["charges"]
-        return rep
-
 
 

@@ -15,7 +15,7 @@ max_stats_dic = {stat : 0 for stat in stats_list}
 for ing in data:
     for stat in ing["ids"]:
         if ing["ids"][stat]["maximum"] > max_stats_dic[stat]:
-            max_stats_dic[stat] =  ing["ids"][stat]["maximum"]
+            max_stats_dic[stat] =  stat["maximum"]
 
 with open("ressources/max_stats.json", "w", encoding="utf-8") as f:
-    json.dump(max_stats_dic, f, indent=4, ensure_ascii=False)      
+    json.dump(data, f, indent=4, ensure_ascii=False)      

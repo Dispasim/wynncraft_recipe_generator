@@ -1,6 +1,11 @@
 {
     
-    
+    "Combat Level": "lvl",
+    "Req Strength": "strReq",
+    "Req Dexterity": "dexReq",
+    "Req Intelligence": "intReq",
+    "Req Agility": "agiReq",
+    "Req Defense": "defReq",
     "% Health Regen": "hprPct",
     "Mana Regen": "mr",
     "Life Steal": "ls",
@@ -101,5 +106,13 @@
     "Max Mana": "maxMana",
     "Main Attack Range": "mainAttackRange",
 
-    "Charges": "charges"
+    "Durability": "durability",
+    "Duration": "duration",
+    "Charges": "charges",
+    "Effectiveness Left": "left",
+    "Effectiveness Right": "right",
+    "Effectiveness Above": "above",
+    "Effectiveness Under": "under",
+    "Effectiveness Touching": "touching",
+    "Effectiveness Not Touching": "nottouching"
 }

@@ -26,7 +26,7 @@ WB_B64_DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+
 SCALE = 15
 
 class Individual:
-    def __init__(self,data,recipes_df,duration_min = 100,item="scroll",chosen_ingredients = None,lvl_max = 120,ingredient_quality_coefficient = 1,min_max_or_mean = "mean",req_stats = [200,200,200,200,200],weights = None,charges_min = 3):
+    def __init__(self,data,recipes_df,duration_min = 100,item="scroll",chosen_ingredients = None,lvl_max = 120,ingredient_quality_coefficient = 1,min_max_or_mean = "mean",req_stats = [200,200,200,200,200],weights = None):
         if chosen_ingredients == None:
             chosen_ingredients = random.choices(data, k=6)
 
@@ -43,7 +43,6 @@ class Individual:
         self.req_stats = req_stats
         self.min_max_or_mean = min_max_or_mean
         self.duration_min = duration_min
-        self.charges_min = charges_min
 
     def fitness(self,stat):   
         #dans un premier temps, fitness ne vise qu'un seule stat
@@ -220,22 +219,20 @@ class Individual:
                     return 0
                 
         
-
+        if self.item in ["potion", "food", "scroll"]:
 
             # ratio entre durée actuelle et durée voulue
-            #duration_ratio = self.duration / self.duration_min
+            duration_ratio = self.duration / self.duration_min
+
             # clamp entre 0 et 1
             #duration_ratio = max(0, min(duration_ratio, 1))
+
             # pénalité progressive exponentielle
             #rep *= duration_ratio ** 2       
-        duration_penalty = 1 / (1 + np.exp(-(self.duration - self.duration_min) / SCALE))
-        total_score *= duration_penalty 
+             
+            duration_penalty = 1 / (1 + np.exp(-(self.duration - self.duration_min) / SCALE))
 
-        if self.item in ["potion", "food", "scroll"]:  
-            charges = self.count_charges()
-            if charges < self.charges_min:
-                total_score *= charges/self.charges_min   
-
+            total_score *= duration_penalty 
 
         return total_score
 
@@ -382,12 +379,5 @@ class Individual:
 
         self.recalculate_duration()
         return self
-    
-    def count_charges(self):
-        rep = 3
-        for ing in self.recipe.flat:
-            rep += ing["consumableIDs"]["charges"]
-        return rep
-
 
 

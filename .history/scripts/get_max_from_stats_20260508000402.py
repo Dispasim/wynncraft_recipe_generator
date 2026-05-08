@@ -18,4 +18,4 @@ for ing in data:
             max_stats_dic[stat] =  ing["ids"][stat]["maximum"]
 
 with open("ressources/max_stats.json", "w", encoding="utf-8") as f:
-    json.dump(max_stats_dic, f, indent=4, ensure_ascii=False)      
+    json.dump(data, f, indent=4, ensure_ascii=False)      

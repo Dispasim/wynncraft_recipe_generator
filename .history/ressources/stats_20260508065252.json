@@ -99,7 +99,5 @@
     "Weaken Enemy": "weakenEnemy",
     "Slow Enemy": "slowEnemy",
     "Max Mana": "maxMana",
-    "Main Attack Range": "mainAttackRange",
-
-    "Charges": "charges"
+    "Main Attack Range": "mainAttackRange"
 }

@@ -232,9 +232,6 @@ class Individual:
         total_score *= duration_penalty 
 
         if self.item in ["potion", "food", "scroll"]:  
-            charges = self.count_charges()
-            if charges < self.charges_min:
-                total_score *= charges/self.charges_min   
 
 
         return total_score
@@ -382,12 +379,5 @@ class Individual:
 
         self.recalculate_duration()
         return self
-    
-    def count_charges(self):
-        rep = 3
-        for ing in self.recipe.flat:
-            rep += ing["consumableIDs"]["charges"]
-        return rep
-
 
 

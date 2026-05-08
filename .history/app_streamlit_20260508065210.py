@@ -125,8 +125,6 @@ with st.sidebar:
 
     stats = ["Strength", "Dexterity", "Intelligence", "Defense", "Agility"]
 
-    charges = st.number_input("Charges", min_value=1, value=3)
-
     req_values = {}
 
     st.subheader("Prérequis")
@@ -214,7 +212,6 @@ def main_page():
                                     min_max_or_mean=min_max_or_mean,
                                     req_stats=req_stats,
                                     weights=weights,
-                                    charges=charges,
                                     pop_size=pop_size)
         #best_archive = {}
         best_total = (None,0)
@@ -227,7 +224,7 @@ def main_page():
             new_pop = []
             for _ in range(pop_size):
                 parent1,parent2 = random.sample(selected, 2)
-                offspring = crossover(parent1,parent2,data,item,level,raw_recipes,ingredient_quality_coefficient,min_max_or_mean,req_stats,weights,charges)
+                offspring = crossover(parent1,parent2,data,item,level,raw_recipes,ingredient_quality_coefficient,min_max_or_mean,req_stats,weights)
                 offspring_ = mutation(offspring,data,mutation_rate)
                 new_pop.append(offspring_)
             population = copy.deepcopy(new_pop)
@@ -242,9 +239,8 @@ def main_page():
             
 
             #best = max([best] + population, key=lambda ind: ind.fitness(stat=translated_stat, duration_min=duration_min, min_max_or_mean=min_max_or_mean, req_stats = st.session_state.req_stats))
-            status_text.text(f"Génération {gen_idx + 1}/{generations}\n")
-            for stat in translated_stats:
-                status_text.text(f"Best fitness {stat} = {best.fitness(stat)}")
+
+            status_text.text(f"Génération {gen_idx + 1}/{generations}\nBest fitness = {best.multi_fitness(stat=translated_stats)}")
             #status_text.text(f"Génération {gen_idx + 1}/{generations}\nBest fitness = {best_archive[0][1]}")
             #status_text.text(f"Génération {gen_idx + 1}/{generations}")
             
