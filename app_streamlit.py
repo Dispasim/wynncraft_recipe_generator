@@ -5,11 +5,14 @@ import json
 import random
 import copy
 from individual import Individual
+from pathlib import Path
 
 st.set_page_config(page_title="Recipe Generator", layout="wide")
 # -------------------------
 # IMPORTS DE FICHIERS
 # -------------------------
+
+
 
 with open(f"ressources/ingreds_clean.json", "r", encoding="utf-8") as f:
     data = json.load(f)
@@ -60,6 +63,9 @@ if "lvl_min" not in st.session_state:
 
 if "blacklist" not in st.session_state:
         st.session_state.blacklist = []
+
+if "stat_whitelist" not in st.session_state:
+    st.session_state.stat_whitelist = []        
 
 if "method" not in st.session_state:
     st.session_state.method = "sus"        
@@ -123,7 +129,7 @@ with st.sidebar:
         format_func=lambda x: "⭐" * x
     )
 
-    stats = ["Strength", "Dexterity", "Intelligence", "Defense", "Agility"]
+    stats_req = ["Strength", "Dexterity", "Intelligence", "Defense", "Agility"]
 
     charges = st.number_input("Charges", min_value=1, value=3)
 
@@ -131,7 +137,7 @@ with st.sidebar:
 
     st.subheader("Prérequis")
 
-    for stat in stats:
+    for stat in stats_req:
         col1, col2 = st.columns([2, 1])
 
         with col1:
@@ -165,6 +171,13 @@ with st.sidebar:
             st.session_state.page = "test"
         st.rerun()    
 
+    if st.button("📜 Historique"):
+        if st.session_state.page == "historic":
+            st.session_state.page = "main"
+        else:   
+            st.session_state.page = "historic"
+        st.rerun()        
+
 
 
 # -------------------------
@@ -174,6 +187,10 @@ def main_page():
     st.title("Recipe Generator")
 
     if run:
+
+        if st.session_state.page != "main":
+            st.session_state.page = "main"
+            st.rerun()
 
         st.write("Running algo...")
 
@@ -194,12 +211,19 @@ def main_page():
         method = st.session_state.method
         mutation_rate = st.session_state.mutation_rate
         req_stats = list(req_values.values())
+        translated_stat_whitelist = [stats_data[stat] for stat in st.session_state.stat_whitelist]
 
         st.session_state.req_stats = req_stats
 
         ingredient_quality_coefficient = calculate_ingredient_quality_bonus(item,quality_one,quality_two)    
 
         raw_recipes = import_recipe_df("ressources/Recipes.xlsx",item)
+
+        if Path("ressources/history.json").exists():
+            with open(f"ressources/history.json", "r", encoding="utf-8") as f:
+                history = json.load(f)
+        else:
+            history = []        
 
         data = sort_ingredients(data,item)
         data = remove_ingredients_not_in_level_range(data,lvl_min,level)    
@@ -215,6 +239,7 @@ def main_page():
                                     req_stats=req_stats,
                                     weights=weights,
                                     charges=charges,
+                                    translated_stat_whitelist = translated_stat_whitelist,
                                     pop_size=pop_size)
         #best_archive = {}
         best_total = (None,0)
@@ -227,7 +252,7 @@ def main_page():
             new_pop = []
             for _ in range(pop_size):
                 parent1,parent2 = random.sample(selected, 2)
-                offspring = crossover(parent1,parent2,data,item,level,raw_recipes,duration_min,ingredient_quality_coefficient,min_max_or_mean,req_stats,weights,charges)
+                offspring = crossover(parent1,parent2,data,item,level,raw_recipes,duration_min,ingredient_quality_coefficient,min_max_or_mean,req_stats,weights,charges,translated_stat_whitelist)
                 offspring_ = mutation(offspring,data,mutation_rate)
                 new_pop.append(offspring_)
             population = copy.deepcopy(new_pop)
@@ -268,6 +293,13 @@ def main_page():
         st.write(f"Hash : CR-{best_total[0].encode_wynn_craft_hash([quality_one,quality_two])}")
         st.write(f"lien : https://wynnbuilder-beta.github.io/crafter/#{best_total[0].encode_wynn_craft_hash([quality_one,quality_two])}")
         st.iframe(f"https://wynnbuilder-beta.github.io/crafter/#{best_total[0].encode_wynn_craft_hash([quality_one,quality_two])}", height=1700)
+        history.insert(0,{"item" : item,
+                        "level" : level,
+                        "stats" : stats,
+                        "multi_fitness" : best_total[1],
+                        "hash" : best_total[0].encode_wynn_craft_hash([quality_one,quality_two])})
+        with open("ressources/history.json", "w", encoding="utf-8") as f:
+            json.dump(history, f, ensure_ascii=False, indent=4)
 
 # -------------------------
 # PAGE AVANCÉE
@@ -275,16 +307,16 @@ def main_page():
 def advanced_page():
     st.title("🔧 Détails avancés")
 
-    st.session_state.pop_size = st.number_input("Population size",min_value=0, value=500)
-    st.session_state.gen = st.number_input("Generations",min_value=0, value=100)
-    st.session_state.x = st.number_input("Nombre de résultats affichés",min_value=0, value=5)
-    st.session_state.n_select = st.number_input("Nombre d'individus sélectionnés par génération",min_value=0, value=100)
-    st.session_state.mutation_rate = st.number_input("Mutation rate", min_value=0.0, max_value=1.0,  value=0.1)
-    st.session_state.elitism = st.checkbox("Elitism activé", value=False)
-    st.session_state.elite_ratio = st.number_input("Elite ratio", min_value=0.0, max_value=1.0,  value=0.1)
+    st.session_state.pop_size = st.number_input("Population size",min_value=0, value=st.session_state.pop_size)
+    st.session_state.gen = st.number_input("Generations",min_value=0, value=st.session_state.gen)
+    st.session_state.x = st.number_input("Nombre de résultats affichés",min_value=0, value=st.session_state.x)
+    st.session_state.n_select = st.number_input("Nombre d'individus sélectionnés par génération",min_value=0, value=st.session_state.n_select)
+    st.session_state.mutation_rate = st.number_input("Mutation rate", min_value=0.0, max_value=1.0,  value=st.session_state.mutation_rate)
+    st.session_state.elitism = st.checkbox("Elitism activé", value=st.session_state.elitism)
+    st.session_state.elite_ratio = st.number_input("Elite ratio", min_value=0.0, max_value=1.0,  value=st.session_state.elite_ratio)
     
     st.session_state.min_max_or_mean = st.selectbox("Way to juge stats", ["mean","max","min"])
-    st.session_state.lvl_min = st.number_input("Niveau minimum des ingrédients",min_value=0,max_value=200, value=0)
+    st.session_state.lvl_min = st.number_input("Niveau minimum des ingrédients",min_value=0,max_value=200, value=st.session_state.lvl_min)
     st.session_state.method = st.selectbox("Méthode de sélection", ["sus","tournament","roulette","rank", "boltz"])
 
 
@@ -298,6 +330,11 @@ def advanced_page():
         default=st.session_state.blacklist
     )
 
+    st.session_state.stat_whitelist = st.multiselect(
+        "Statique non sacrifiables",
+        options=stats_list,
+        default=st.session_state.stat_whitelist
+    )
 
     st.divider()
 
@@ -348,7 +385,7 @@ def test_page():
 
     if st.button("generate"):
         ind = Individual(data=data,recipes_df = import_recipe_df("ressources/Recipes.xlsx",item),item = item,chosen_ingredients=[get_ingredient_from_string(data,ingredient_1),get_ingredient_from_string(data,ingredient_2),get_ingredient_from_string(data,ingredient_3),get_ingredient_from_string(data,ingredient_4),get_ingredient_from_string(data,ingredient_5),get_ingredient_from_string(data,ingredient_6)],lvl_max=level,ingredient_quality_coefficient=calculate_ingredient_quality_bonus(item,quality_one,quality_two))
-        st.write("Score:", ind.fitness(stat=translated_stat,duration_min=duration_min,min_max_or_mean=st.session_state.min_max_or_mean,req_stats=list(req_values.values())))
+        st.write("Score:", ind.multi_fitness(translated_stats))
         st.write("Matrice de boost :")
         st.write(ind.give_boost_array())
         st.write(f"stats : {ind.show_stats()}")
@@ -365,6 +402,27 @@ def test_page():
         st.session_state.page = "main"
         st.rerun()
 
+# -------------------------
+# PAGE HISTORIC
+# -------------------------
+def historic_page():
+    st.title("🔧 Historique")
+
+    if Path("ressources/history.json").exists():
+            with open(f"ressources/history.json", "r", encoding="utf-8") as f:
+                history_ = json.load(f)
+    else:
+        history_ = []      
+
+    for recipe in history_:
+        st.write(f"lien : https://wynnbuilder-beta.github.io/crafter/#{recipe["hash"]}")
+        st.iframe(f"https://wynnbuilder-beta.github.io/crafter/#{recipe["hash"]}", height=1700)
+
+    if st.button("⬅ Retour"):
+        st.session_state.page = "main"
+        st.rerun()
+        
+
 
 
 # -------------------------
@@ -374,5 +432,7 @@ if st.session_state.page == "advanced":
     advanced_page()
 elif st.session_state.page == "test":   
     test_page() 
+elif st.session_state.page == "historic":   
+    historic_page()     
 else:
     main_page()

@@ -26,7 +26,7 @@ WB_B64_DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+
 SCALE = 15
 
 class Individual:
-    def __init__(self,data,recipes_df,duration_min = 100,item="scroll",chosen_ingredients = None,lvl_max = 120,ingredient_quality_coefficient = 1,min_max_or_mean = "mean",req_stats = [200,200,200,200,200],weights = None,charges_min = 3):
+    def __init__(self,data,recipes_df,duration_min = 100,item="scroll",chosen_ingredients = None,lvl_max = 120,ingredient_quality_coefficient = 1,min_max_or_mean = "mean",req_stats = [200,200,200,200,200],weights = None,charges_min = 3,translated_stat_whitelist = []):
         if chosen_ingredients == None:
             chosen_ingredients = random.choices(data, k=6)
 
@@ -44,6 +44,7 @@ class Individual:
         self.min_max_or_mean = min_max_or_mean
         self.duration_min = duration_min
         self.charges_min = charges_min
+        self.stat_whitelist = translated_stat_whitelist
 
     def fitness(self,stat):   
         #dans un premier temps, fitness ne vise qu'un seule stat
@@ -115,22 +116,9 @@ class Individual:
         
                      
         
-        
-        """if self.duration < duration_min:
-            rep = sum(stat_array.flat)*(2/(1 + np.exp(-(self.duration - duration_min)/SCALE)))"""
-        
-        """if self.duration <= 0:
-            rep = 0             
-        elif 0 < self.duration < duration_min:
-            rep = sum(stat_array.flat) * (2/(1 + np.exp(-(self.duration - duration_min)/SCALE)))   """
-        if self.duration <= 0:
-            rep = 0             
-        elif 0 < self.duration < self.duration_min:
-            rep = sum(stat_array.flat) * (self.duration/self.duration_min)
-        
-        else:
-            rep = sum(stat_array.flat)
-        if self.item in ["chestplate",
+
+        rep = sum(stat_array.flat)
+        """if self.item in ["chestplate",
                     "helmet",
                     "leggings",
                     "boots",
@@ -144,7 +132,7 @@ class Individual:
                     "bracelet"]:
             for i in range(len(req_list)):
                 if req_list[i] > self.req_stats[i]:
-                    rep = 0    
+                    rep = 0    """
           
         return rep    
     
@@ -218,7 +206,11 @@ class Individual:
             for i in range(len(self.req_stats)):
                 if self.req_list[i] > self.req_stats[i]:
                     return 0
-                
+        # --- Vérifie les stats de la whitelist ---       
+        for stat in self.stat_whitelist:
+            if self.fitness(stat)<0:
+                return 0
+
         
 
 

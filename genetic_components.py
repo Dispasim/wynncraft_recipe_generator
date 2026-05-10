@@ -10,8 +10,8 @@ import copy
 # INITIALISATION
 # ======================
 
-def create_population(data,item,lvl_max,recipe_df,duration_min,ingredient_quality_coefficient,min_max_or_mean,req_stats,weights,charges,pop_size):
-    return [Individual(data=data,item=item,lvl_max=lvl_max,recipes_df=recipe_df,duration_min=duration_min,ingredient_quality_coefficient=ingredient_quality_coefficient,min_max_or_mean=min_max_or_mean,req_stats=req_stats,weights=weights,charges_min=charges) for _ in range(pop_size)]
+def create_population(data,item,lvl_max,recipe_df,duration_min,ingredient_quality_coefficient,min_max_or_mean,req_stats,weights,charges,translated_stat_whitelist,pop_size):
+    return [Individual(data=data,item=item,lvl_max=lvl_max,recipes_df=recipe_df,duration_min=duration_min,ingredient_quality_coefficient=ingredient_quality_coefficient,min_max_or_mean=min_max_or_mean,req_stats=req_stats,weights=weights,charges_min=charges,translated_stat_whitelist = translated_stat_whitelist) for _ in range(pop_size)]
 
 # ======================
 # SÉLECTION
@@ -178,9 +178,9 @@ def select(population, translated_stat, method="sus", n_select=80, **kwargs):
 # ======================
 # CROSSOVER
 # ======================
-def crossover(parent1, parent2,data,item, lvl_max, raw_recipe,duration_min, ingredient_quality_coefficient,min_max_or_mean,req_stats,weights,charges):
+def crossover(parent1, parent2,data,item, lvl_max, raw_recipe,duration_min, ingredient_quality_coefficient,min_max_or_mean,req_stats,weights,charges,translated_stat_whitelist):
     crossover_ingredients = [parent1.recipe.flat[i] for i in [0,2,4]] + [parent2.recipe.flat[i] for i in [1,3,5]]
-    child = Individual(data,chosen_ingredients=crossover_ingredients,item=item,lvl_max=lvl_max,recipes_df=raw_recipe,duration_min=duration_min,ingredient_quality_coefficient=ingredient_quality_coefficient,min_max_or_mean=min_max_or_mean,req_stats=req_stats,weights=weights,charges_min=charges)
+    child = Individual(data,chosen_ingredients=crossover_ingredients,item=item,lvl_max=lvl_max,recipes_df=raw_recipe,duration_min=duration_min,ingredient_quality_coefficient=ingredient_quality_coefficient,min_max_or_mean=min_max_or_mean,req_stats=req_stats,weights=weights,charges_min=charges,translated_stat_whitelist=translated_stat_whitelist)
     return child
 
 """def crossover(parent1, parent2):
