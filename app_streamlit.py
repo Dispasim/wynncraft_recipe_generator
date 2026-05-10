@@ -71,7 +71,17 @@ if "method" not in st.session_state:
     st.session_state.method = "sus"        
 
 if "min_max_or_mean" not in st.session_state:
-    st.session_state.min_max_or_mean = "mean"          
+    st.session_state.min_max_or_mean = "mean"    
+
+if "req_values" not in st.session_state:
+    st.session_state.req_values = {"Strength":200,
+                  "Dexterity":200,
+                  "Intelligence":200,
+                  "Defense":200,
+                  "Agility":200}
+
+
+
 
 
 
@@ -133,23 +143,26 @@ with st.sidebar:
 
     charges = st.number_input("Charges", min_value=1, value=3)
 
-    req_values = {}
+    req_values = st.session_state.req_values
 
-    st.subheader("Prérequis")
+    check_requirements = st.checkbox("Check requirements", value=False)
 
-    for stat in stats_req:
-        col1, col2 = st.columns([2, 1])
+    if check_requirements:
+        st.subheader("Prérequis")
 
-        with col1:
-            st.write(stat)
+        for stat in stats_req:
+            col1, col2 = st.columns([2, 1])
 
-        with col2:
-            req_values[stat] = st.number_input(
-                label=f"{stat}_input",
-                min_value=0,
-                value=200,
-                label_visibility="collapsed"
-            )
+            with col1:
+                st.write(stat)
+
+            with col2:
+                req_values[stat] = st.number_input(
+                    label=f"{stat}_input",
+                    min_value=0,
+                    value=req_values[stat],
+                    label_visibility="collapsed"
+                )
 
     #st.write(type(values))
     
@@ -240,6 +253,7 @@ def main_page():
                                     weights=weights,
                                     charges=charges,
                                     translated_stat_whitelist = translated_stat_whitelist,
+                                    check_requirements = check_requirements,
                                     pop_size=pop_size)
         #best_archive = {}
         best_total = (None,0)
@@ -252,7 +266,7 @@ def main_page():
             new_pop = []
             for _ in range(pop_size):
                 parent1,parent2 = random.sample(selected, 2)
-                offspring = crossover(parent1,parent2,data,item,level,raw_recipes,duration_min,ingredient_quality_coefficient,min_max_or_mean,req_stats,weights,charges,translated_stat_whitelist)
+                offspring = crossover(parent1,parent2,data,item,level,raw_recipes,duration_min,ingredient_quality_coefficient,min_max_or_mean,req_stats,weights,charges,translated_stat_whitelist,check_requirements)
                 offspring_ = mutation(offspring,data,mutation_rate)
                 new_pop.append(offspring_)
             population = copy.deepcopy(new_pop)

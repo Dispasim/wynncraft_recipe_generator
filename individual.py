@@ -26,7 +26,7 @@ WB_B64_DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+
 SCALE = 15
 
 class Individual:
-    def __init__(self,data,recipes_df,duration_min = 100,item="scroll",chosen_ingredients = None,lvl_max = 120,ingredient_quality_coefficient = 1,min_max_or_mean = "mean",req_stats = [200,200,200,200,200],weights = None,charges_min = 3,translated_stat_whitelist = []):
+    def __init__(self,data,recipes_df,duration_min = 100,item="scroll",chosen_ingredients = None,lvl_max = 120,ingredient_quality_coefficient = 1,min_max_or_mean = "mean",req_stats = [200,200,200,200,200],weights = None,charges_min = 3,translated_stat_whitelist = [],check_requirements = False):
         if chosen_ingredients == None:
             chosen_ingredients = random.choices(data, k=6)
 
@@ -45,6 +45,7 @@ class Individual:
         self.duration_min = duration_min
         self.charges_min = charges_min
         self.stat_whitelist = translated_stat_whitelist
+        self.check_requirements = check_requirements
 
     def fitness(self,stat):   
         #dans un premier temps, fitness ne vise qu'un seule stat
@@ -202,10 +203,23 @@ class Individual:
             total_score *= balance_bonus
 
         # --- Pénalité requirements (déjà dans ton code mais renforcée ici) ---
-        if hasattr(self, "req_list"):
-            for i in range(len(self.req_stats)):
-                if self.req_list[i] > self.req_stats[i]:
-                    return 0
+        if self.check_requirements and self.item in ["chestplate",
+                    "helmet",
+                    "leggings",
+                    "boots",
+                    "relik",
+                    "wand",
+                    "spear",
+                    "dagger",
+                    "bow",
+                    "ring",
+                    "necklace",
+                    "bracelet"]:
+            if hasattr(self, "req_list"):
+                for i in range(len(self.req_stats)):
+                    if self.req_list[i] > self.req_stats[i]:
+                        return 0
+                    
         # --- Vérifie les stats de la whitelist ---       
         for stat in self.stat_whitelist:
             if self.fitness(stat)<0:
