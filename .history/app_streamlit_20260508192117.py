@@ -141,7 +141,8 @@ with st.sidebar:
             req_values[stat] = st.number_input(
                 label=f"{stat}_input",
                 min_value=0,
-                value=200,
+                max_value=150,
+                value=0,
                 label_visibility="collapsed"
             )
 
